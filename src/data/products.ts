@@ -12,9 +12,12 @@ export type Layer =
 
 export interface Product {
   id: string;          // stable slug
-  name: string;        // canonical product name
-  domain: string;      // venture domain (also display label)
-  url: string;         // live deployment
+  name: string;        // canonical brand name
+  domain: string;      // brand domain (display + future canonical URL)
+  legacyDomain: string;// the original venture domain (for git/vercel reference)
+  url: string;         // live deployment (current Vercel URL)
+  city: string;        // anchor city
+  country: string;     // country of the anchor city
   layer: Layer;
   /** ≤ 8 words. The problem it solves, in plain language. */
   problem: string;
@@ -65,22 +68,28 @@ export const LAYERS: Record<
 export const PRODUCTS: Product[] = [
   // ── Governance ─────────────────────────────────────────────
   {
-    id: "neurl",
-    name: "Agentic Kernel",
-    domain: "neurl.sg",
+    id: "atlas",
+    name: "Atlas",
+    domain: "atlas.sg",
+    legacyDomain: "neurl.sg",
     url: "https://neurl-alignmentai.vercel.app",
+    city: "Singapore",
+    country: "Singapore",
     layer: "governance",
     problem: "Fifty agents touching one repo. Who arbitrates?",
     oneLiner: "OS-level process manager for autonomous agents.",
     insight:
-      "Agents are processes, not chat sessions. Kernel gives them PIDs, context budgets, file-level locks, and typed inter-agent communication.",
+      "Agents are processes, not chat sessions. Atlas gives them PIDs, context budgets, file-level locks, and typed inter-agent communication.",
     signal: "a16z: Agent-Native Infrastructure",
   },
   {
-    id: "flow",
-    name: "Constraint Engine",
-    domain: "flow.at",
+    id: "axiom",
+    name: "Axiom",
+    domain: "axiom.at",
+    legacyDomain: "flow.at",
     url: "https://flow-at-alignmentai.vercel.app",
+    city: "Vienna",
+    country: "Austria",
     layer: "governance",
     problem: "Agents break rules nobody told them existed.",
     oneLiner: "Safety as physics, not policy.",
@@ -89,10 +98,13 @@ export const PRODUCTS: Product[] = [
     signal: "Ventura: Human-in-the-Loop Infrastructure",
   },
   {
-    id: "aivi",
-    name: "Architecture Ledger",
-    domain: "aivi.co.uk",
+    id: "cairn",
+    name: "Cairn",
+    domain: "cairn.co.uk",
+    legacyDomain: "aivi.co.uk",
     url: "https://aivi-alignmentai.vercel.app",
+    city: "London",
+    country: "United Kingdom",
     layer: "governance",
     problem: "Why did the AI change that file? Nobody knows.",
     oneLiner: "Causal provenance graph for every agent decision.",
@@ -103,10 +115,13 @@ export const PRODUCTS: Product[] = [
 
   // ── Verification ───────────────────────────────────────────
   {
-    id: "finiteinfinite",
-    name: "Determinist Gateway",
-    domain: "finiteinfinite.ca",
+    id: "lodestar",
+    name: "Lodestar",
+    domain: "lodestar.ca",
+    legacyDomain: "finiteinfinite.ca",
     url: "https://finiteinfinite-alignmentai.vercel.app",
+    city: "Toronto",
+    country: "Canada",
     layer: "verification",
     problem: "Agent code ships without proof it works.",
     oneLiner: "Formal proofs of correctness for agent outputs.",
@@ -118,9 +133,12 @@ export const PRODUCTS: Product[] = [
   // ── Optimization ───────────────────────────────────────────
   {
     id: "aicapital",
-    name: "Agent Debt Optimizer",
+    name: "AI Capital",
     domain: "aicapital.ee",
+    legacyDomain: "aicapital.ee",
     url: "https://aicapital-alignmentai.vercel.app",
+    city: "Tallinn",
+    country: "Estonia",
     layer: "optimization",
     problem: "Your agents burned $4,200 overnight. No one noticed.",
     oneLiner: "Linter for agentic logic that predicts hidden costs.",
@@ -129,10 +147,13 @@ export const PRODUCTS: Product[] = [
     signal: "Ventura: Cost Attribution for AI Spend",
   },
   {
-    id: "tesl",
-    name: "Energy-Aware Routing",
+    id: "teslon",
+    name: "Tesl.on",
     domain: "tesl.on",
+    legacyDomain: "tesl.on",
     url: "https://tesl-on-alignmentai.vercel.app",
+    city: "Reykjavik",
+    country: "Iceland",
     layer: "optimization",
     problem: "AI workloads burn energy blind to where it comes from.",
     oneLiner: "Route agent workloads by energy cost, not just latency.",
@@ -141,10 +162,13 @@ export const PRODUCTS: Product[] = [
     signal: "MIT EnergAIzer · Benchmark grid optimization",
   },
   {
-    id: "playbookfilms",
-    name: "Intent-Driven UI",
-    domain: "playbookfilms.ie",
+    id: "quill",
+    name: "Quill",
+    domain: "quill.ie",
+    legacyDomain: "playbookfilms.ie",
     url: "https://playbookfilms-alignmentai.vercel.app",
+    city: "Dublin",
+    country: "Ireland",
     layer: "optimization",
     problem: "Your IDE shows the same toolbar regardless of task.",
     oneLiner: "Development environment that builds itself for your current task.",
@@ -153,10 +177,13 @@ export const PRODUCTS: Product[] = [
     signal: "YC Summer 2026: Dynamic Software Interfaces",
   },
   {
-    id: "lessventures",
-    name: "Self-Optimizing Micro-SaaS",
-    domain: "lessventures.us",
+    id: "mend",
+    name: "Mend",
+    domain: "mend.us",
+    legacyDomain: "lessventures.us",
     url: "https://lessventures-alignmentai.vercel.app",
+    city: "San Francisco",
+    country: "United States",
     layer: "optimization",
     problem: "A user complains. A human fixes it. Repeat forever.",
     oneLiner: "A persistent agent that rewrites its own application logic.",
@@ -167,10 +194,13 @@ export const PRODUCTS: Product[] = [
 
   // ── Infrastructure ─────────────────────────────────────────
   {
-    id: "dynamic",
-    name: "Self-Architecting Microservices",
-    domain: "dynamic.fi",
+    id: "aalto",
+    name: "Aalto",
+    domain: "aalto.fi",
+    legacyDomain: "dynamic.fi",
     url: "https://dynamic-fi-alignmentai.vercel.app",
+    city: "Helsinki",
+    country: "Finland",
     layer: "infrastructure",
     problem: "Traffic shifts. Architecture doesn't.",
     oneLiner: "AI SRE that autonomously refactors its own service topology.",
@@ -179,10 +209,13 @@ export const PRODUCTS: Product[] = [
     signal: "Cloudflare Agent Cloud",
   },
   {
-    id: "smile",
-    name: "Infrastructure Immune System",
-    domain: "smile.dk",
+    id: "salve",
+    name: "Salve",
+    domain: "salve.dk",
+    legacyDomain: "smile.dk",
     url: "https://smile-dk-alignmentai.vercel.app",
+    city: "Copenhagen",
+    country: "Denmark",
     layer: "infrastructure",
     problem: "A bad commit broke prod. Which commit? Nobody knows.",
     oneLiner: "Self-healing infrastructure via commit-level regression tracing.",
@@ -193,10 +226,13 @@ export const PRODUCTS: Product[] = [
 
   // ── Physical & Frontier ────────────────────────────────────
   {
-    id: "planetpi",
-    name: "Agentic Simulation",
-    domain: "planetpi.ch",
+    id: "bellwether",
+    name: "Bellwether",
+    domain: "bellwether.ch",
+    legacyDomain: "planetpi.ch",
     url: "https://planetpi-alignmentai.vercel.app",
+    city: "Zurich",
+    country: "Switzerland",
     layer: "physical",
     problem: "You can't unit-test a market or a city.",
     oneLiner: "Digital twin of complex systems using agent swarms.",
@@ -205,10 +241,13 @@ export const PRODUCTS: Product[] = [
     signal: "Anthropic AAR · a16z Physical Observability",
   },
   {
-    id: "robocars",
-    name: "Digital Twin Debugger",
-    domain: "robocars.co.nz",
+    id: "antipode",
+    name: "Antipode",
+    domain: "antipode.co.nz",
+    legacyDomain: "robocars.co.nz",
     url: "https://robocars-alignmentai.vercel.app",
+    city: "Auckland",
+    country: "New Zealand",
     layer: "physical",
     problem: "Hardware iteration is weeks. Software is seconds.",
     oneLiner: "Hot-reloading for physical engineering.",
