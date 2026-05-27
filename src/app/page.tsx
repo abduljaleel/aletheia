@@ -8,12 +8,6 @@ const LAYER_ORDER: Layer[] = [
   "physical",
 ];
 
-// Equirectangular projection: world coords → SVG 1000×500
-const project = (lat: number, lng: number) => ({
-  x: ((lng + 180) / 360) * 1000,
-  y: ((90 - lat) / 180) * 500,
-});
-
 export default function Home() {
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#06070a] text-[#e0e0ec]">
@@ -147,7 +141,7 @@ function Hero() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// THE ATLAS — world map with city pins + city register
+// THE ATLAS — passport-stamp grid with large flags per city
 function Atlas() {
   return (
     <section
@@ -167,15 +161,10 @@ function Atlas() {
           product its soul.
         </p>
 
-        {/* World map with pins */}
-        <div className="relative mt-12 overflow-hidden rounded border border-[#141420] bg-[#0a0b10] p-4">
-          <WorldMap />
-        </div>
-
-        {/* Cities register — sortable, scannable */}
-        <div className="mt-8 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {PRODUCTS.map((p) => (
-            <CityCard key={p.id} product={p} />
+        {/* Passport-stamp grid: bold flags */}
+        <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {PRODUCTS.map((p, i) => (
+            <FlagCard key={p.id} product={p} index={i} />
           ))}
         </div>
       </div>
@@ -183,179 +172,93 @@ function Atlas() {
   );
 }
 
-function WorldMap() {
-  return (
-    <div className="relative w-full" style={{ aspectRatio: "2 / 1" }}>
-      <svg
-        viewBox="0 0 1000 500"
-        className="absolute inset-0 h-full w-full"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        {/* Subtle lat/lng grid */}
-        <g opacity="0.15">
-          {/* Equator */}
-          <line x1="0" y1="250" x2="1000" y2="250" stroke="#3a3a50" strokeWidth="0.5" />
-          {/* Tropics */}
-          <line x1="0" y1="186" x2="1000" y2="186" stroke="#252535" strokeWidth="0.3" strokeDasharray="2 4" />
-          <line x1="0" y1="314" x2="1000" y2="314" stroke="#252535" strokeWidth="0.3" strokeDasharray="2 4" />
-          {/* Prime meridian */}
-          <line x1="500" y1="0" x2="500" y2="500" stroke="#3a3a50" strokeWidth="0.5" />
-          {/* Other meridians */}
-          {[125, 250, 375, 625, 750, 875].map((x) => (
-            <line key={x} x1={x} y1="0" x2={x} y2="500" stroke="#252535" strokeWidth="0.3" strokeDasharray="2 4" />
-          ))}
-          {/* Other parallels */}
-          {[63, 125, 375, 438].map((y) => (
-            <line key={y} x1="0" y1={y} x2="1000" y2={y} stroke="#252535" strokeWidth="0.3" strokeDasharray="2 4" />
-          ))}
-        </g>
-
-        {/* Continent silhouettes — minimal hint, just shaded regions */}
-        <g opacity="0.04" fill="#5e7cff">
-          {/* North America hint */}
-          <ellipse cx="240" cy="160" rx="120" ry="80" />
-          {/* South America hint */}
-          <ellipse cx="320" cy="340" rx="55" ry="90" />
-          {/* Europe + Africa hint */}
-          <ellipse cx="510" cy="200" rx="60" ry="60" />
-          <ellipse cx="540" cy="320" rx="80" ry="100" />
-          {/* Asia hint */}
-          <ellipse cx="700" cy="190" rx="160" ry="90" />
-          {/* Australia hint */}
-          <ellipse cx="830" cy="370" rx="60" ry="40" />
-        </g>
-
-        {/* Connection lines between cities (faint, suggesting the stack) */}
-        <g opacity="0.12" stroke="#5e7cff" strokeWidth="0.5" fill="none">
-          {PRODUCTS.map((p, i) => {
-            if (i === 0) return null;
-            const prev = PRODUCTS[i - 1];
-            const from = project(prev.lat, prev.lng);
-            const to = project(p.lat, p.lng);
-            return (
-              <line
-                key={p.id}
-                x1={from.x}
-                y1={from.y}
-                x2={to.x}
-                y2={to.y}
-              />
-            );
-          })}
-        </g>
-
-        {/* City pins */}
-        {PRODUCTS.map((p, i) => {
-          const { x, y } = project(p.lat, p.lng);
-          const color = LAYERS[p.layer].color;
-          const delay = `${(i * 0.15) % 2.5}s`;
-          return (
-            <g key={p.id}>
-              {/* Outer halo */}
-              <circle
-                cx={x}
-                cy={y}
-                r="14"
-                fill={color}
-                opacity="0.08"
-                style={{ animation: `pulse 2.8s ease-in-out ${delay} infinite` }}
-              />
-              {/* Inner dot */}
-              <circle cx={x} cy={y} r="3.5" fill={color} />
-              {/* Hairline center */}
-              <circle cx={x} cy={y} r="1" fill="#ffffff" opacity="0.9" />
-              {/* Label */}
-              <text
-                x={x + 10}
-                y={y - 6}
-                fill="#e0e0ec"
-                fontSize="11"
-                fontFamily="ui-monospace, monospace"
-                opacity="0.7"
-              >
-                {p.name}
-              </text>
-              <text
-                x={x + 10}
-                y={y + 5}
-                fill="#5a5a70"
-                fontSize="8"
-                fontFamily="ui-monospace, monospace"
-                letterSpacing="0.5"
-              >
-                {p.city.toUpperCase()}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-    </div>
-  );
-}
-
-function CityCard({ product: p }: { product: Product }) {
+function FlagCard({ product: p, index }: { product: Product; index: number }) {
   const layer = LAYERS[p.layer];
   const latLng = `${p.lat >= 0 ? "+" : ""}${p.lat.toFixed(2)}° ${
     p.lng >= 0 ? "+" : ""
   }${p.lng.toFixed(2)}°`;
+
+  // Build a 2-stripe or 3-stripe gradient from the flag's colors
+  const stripeBg =
+    p.flagColors.length === 2
+      ? `linear-gradient(180deg, ${p.flagColors[0]} 50%, ${p.flagColors[1]} 50%)`
+      : `linear-gradient(180deg, ${p.flagColors[0]} 0% 33%, ${p.flagColors[1]} 33% 66%, ${p.flagColors[2]} 66% 100%)`;
 
   return (
     <a
       href={p.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex items-center gap-4 rounded border border-[#141420] bg-[#0a0b10] p-4 transition-colors hover:border-[#2a2a45] hover:bg-[#0d0e15]"
+      className="group relative overflow-hidden rounded-md border border-[#141420] bg-[#0a0b10] transition-all hover:border-[#2a2a45] hover:bg-[#0d0e15]"
+      style={{ animation: `slideUp 0.6s ${index * 0.05}s ease both` }}
     >
-      {/* Flag */}
-      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded">
-        {/* CSS fallback stripes (visible only if emoji fails) */}
-        <div
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            background:
-              p.flagColors.length === 2
-                ? `linear-gradient(180deg, ${p.flagColors[0]} 50%, ${p.flagColors[1]} 50%)`
-                : `linear-gradient(180deg, ${p.flagColors[0]} 33%, ${p.flagColors[1]} 33% 66%, ${p.flagColors[2]} 66%)`,
-            opacity: 0.25,
-          }}
-        />
-        <span className="relative text-2xl" style={{ lineHeight: 1 }}>
-          {p.flag}
-        </span>
-      </div>
+      {/* Flag color gradient as left-side band (very subtle) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 left-0 w-1.5"
+        style={{ background: stripeBg, opacity: 0.6 }}
+      />
+      {/* Layer-color hover stripe (replaces flag stripe on hover) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 left-0 w-1.5 opacity-0 transition-opacity group-hover:opacity-100"
+        style={{ background: layer.color }}
+      />
 
-      {/* Text */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-5 px-7 pb-6 pt-8">
+        {/* Top row: city + country + layer dot */}
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#5a5a70]">
+              {p.country}
+            </div>
+            <div className="mt-1 font-serif text-2xl font-light leading-tight text-[#e0e0ec]">
+              {p.city}
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <span
+              className="block h-1.5 w-1.5 rounded-full"
+              style={{ background: layer.color }}
+              title={layer.label}
+            />
+            <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-[#3a3a50]">
+              {layer.label.split(" ")[0]}
+            </span>
+          </div>
+        </div>
+
+        {/* HERO: massive flag */}
+        <div className="flex items-center justify-center py-2">
           <span
-            className="font-mono text-[9px] uppercase tracking-[0.15em]"
+            className="block leading-none"
+            style={{ fontSize: "clamp(72px, 12vw, 110px)" }}
+            aria-label={`Flag of ${p.country}`}
+          >
+            {p.flag}
+          </span>
+        </div>
+
+        {/* Brand name */}
+        <div className="text-center">
+          <div className="font-serif text-3xl font-normal leading-tight text-[#e0e0ec]">
+            {p.name}
+          </div>
+          <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.15em]" style={{ color: layer.color }}>
+            {p.domain}
+          </div>
+        </div>
+
+        {/* Coordinates + visit indicator */}
+        <div className="flex items-center justify-between border-t border-[#141420] pt-4 font-mono text-[9px] uppercase tracking-[0.15em]">
+          <span className="text-[#3a3a50]">{latLng}</span>
+          <span
+            className="opacity-0 transition-opacity group-hover:opacity-100"
             style={{ color: layer.color }}
           >
-            {p.city}
-          </span>
-          <span className="font-mono text-[9px] text-[#3a3a50]">·</span>
-          <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-[#4a4a60]">
-            {p.country}
+            Visit →
           </span>
         </div>
-        <div className="font-serif text-xl font-normal leading-tight text-[#e0e0ec]">
-          {p.name}
-        </div>
-        <div className="mt-0.5 font-mono text-[9px] tracking-wider text-[#3a3a50]">
-          {latLng} · {p.domain}
-        </div>
-      </div>
-
-      {/* Layer dot */}
-      <div className="flex shrink-0 flex-col items-end gap-1">
-        <span
-          className="block h-1.5 w-1.5 rounded-full"
-          style={{ background: layer.color }}
-        />
-        <span className="font-mono text-[8px] uppercase tracking-[0.15em] text-[#3a3a50]">
-          {layer.label.split(" ")[0]}
-        </span>
       </div>
     </a>
   );
